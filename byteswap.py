@@ -1,17 +1,33 @@
-wfin = open("save.sra", "rb")
-fout = open("output.bin", "wb")
-data_in = fin.read()
-fsize = len(data_in)
-fin.close()
+from ntpath import exists, getsize, realpath
+from shutil import copy2
 
-if fsize % 4 != 0:
-    print("Invalid file size!")
-    fout.close()
+def byteswap(file):
+    
+    #back up input file
+    copy = realpath(file) + '.bak'
+    existing = exists(copy)
+    while existing:
+        copy += '.bak'
+        existing = exists(copy)
+    copy2(file, copy)
 
-else:
-    fin = open("save.sra", "rb")
+    #input file, file size
+    f = open(file, "r+b")
+    fsize = getsize(file)
 
-    for x in range(1, (fsize // 4) + 1):
-        data_in = [fin.read(1), fin.read(1), fin.read(1), fin.read(1)]
-        data_out = data_in[3] + data_in[2] + data_in[1] + data_in[0]
-        fout.write(data_out)
+    #check that file size is divisible by 4
+    if fsize % 4 != 0:
+        print("Invalid file size!")
+
+    #read 4 bytes at a time from the file, then rewrite the 4 bytes in reverse
+    else:
+        x = 0
+        while x < fsize:
+            f.seek(x)
+            data = [int.from_bytes(f.read(1), "big"), int.from_bytes(f.read(1), "big"), int.from_bytes(f.read(1), "big"), int.from_bytes(f.read(1), "big")]
+            data = data[::-1]
+            f.seek(x)
+            f.write(bytes(data))
+            x += 4
+
+    f.close()
