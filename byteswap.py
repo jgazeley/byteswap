@@ -1,9 +1,9 @@
+from sys import argv
 from ntpath import exists, getsize, realpath
 from shutil import copy2
 
 def byteswap(file):
-    
-    #back up input file
+
     copy = realpath(file) + '.bak'
     existing = exists(copy)
     while existing:
@@ -11,7 +11,7 @@ def byteswap(file):
         existing = exists(copy)
     copy2(file, copy)
 
-    #input file, file size
+    #input file, output file, file size
     f = open(file, "r+b")
     fsize = getsize(file)
 
@@ -31,3 +31,5 @@ def byteswap(file):
             x += 4
 
     f.close()
+
+byteswap(argv[1])
